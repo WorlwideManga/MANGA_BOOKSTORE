@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Manga Bookstore System</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+        }
+        .menu {
+            margin-bottom: 20px;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+        table, th, td {
+            border: 1px solid black;
+        }
+        th, td {
+            padding: 10px;
+            text-align: left;
+        }
+    </style>
+</head>
+<body>
+    <h1>Manga Bookstore System</h1>
+    <div class="menu">
+        <button onclick="showAddBookForm()">Add New Book</button>
+        <button onclick="displayAllBooks()">Display All Books</button>
+        <button onclick="showSearchBookForm()">Search Book</button>
+        <button onclick="showBorrowBookForm()">Process Book Borrowing</button>
+    </div>
+
+    <div id="output"></div>
+
+    <script>
+        const books = [];
+        const MAX_BOOKS = 100;
+
+        function isValidBookID(id) {
+            return id.length === 4 && id.startsWith('B') && !isNaN(id.slice(1));
+        }
+
+        function showAddBookForm() {
+            const output = `
+                <h2>Add New Book</h2>
+                <form onsubmit="addNewBook(event)">
+                    <label>Book ID (e.g., B001): </label>
+                    <input type="text" id="bookID" required><br><br>
+                    <label>Book Name: </label>
+                    <input type="text" id="bookName" required><br><br>
+                    <label>Book Brand: </label>
+                    <input type="text" id="bookBrand" required><br><br>
+                    <label>Quantity: </label>
+                    <input type="number" id="bookQuantity" min="1" required><br><br>
+                    <button type="submit">Add Book</button>
+                </form>
+            `;
+            document.getElementById('output').innerHTML = output;
+        }
+
+        function addNewBook(event) {
+            event.preventDefault();
+            const id = document.getElementById('bookID').value;
+            const name = document.getElementById('bookName').value;
+            const brand = document.getElementById('bookBrand').value;
+            const quantity = parseInt(document.getElementById('bookQuantity').value, 10);
+
+            if (!isValidBookID(id)) {
+                alert("Invalid Book ID format!");
+                return;
+            }
+
+            if (books.length >= MAX_BOOKS) {
+                alert("Error: Maximum book capacity reached!");
+                return;
+            }
+
+            if (books.some(book => book.id === id)) {
+                alert("Error: Book ID already exists!");
+                return;
+            }
+
+            books.push({ id, name, brand, quantity });
+            alert("Book added successfully!");
+        }
+
+        function displayAllBooks() {
+            if (books.length === 0) {
+                document.getElementById('output').innerHTML = "<p>No books available.</p>";
+                return;
+            }
+
+            let table = `
+                <h2>All Books</h2>
+                <table>
+                    <tr>
+                        <th>Book ID</th>
+                        <th>Name</th>
+                        <th>Brand</th>
+                        <th>Quantity</th>
+                    </tr>
+            `;
+
+            books.forEach(book => {
+                table += `
+                    <tr>
+                        <td>${book.id}</td>
+                        <td>${book.name}</td>
+                        <td>${book.brand}</td>
+                        <td>${book.quantity}</td>
+                    </tr>
+                `;
+            });
+
+            table += "</table>";
+            document.getElementById('output').innerHTML = table;
+        }
+
+        function showSearchBookForm() {
+            const output = `
+                <h2>Search Book</h2>
+                <form onsubmit="searchBook(event)">
+                    <label>Book ID: </label>
+                    <input type="text" id="searchBookID" required><br><br>
+                    <button type="submit">Search</button>
+                </form>
+            `;
+            document.getElementById('output').innerHTML = output;
+        }
+
+        function searchBook(event) {
+            event.preventDefault();
+            const id = document.getElementById('searchBookID').value;
+
+            const book = books.find(book => book.id === id);
+            if (book) {
+                document.getElementById('output').innerHTML = `
+                    <h2>Book Found</h2>
+                    <p>ID: ${book.id}</p>
+                    <p>Name: ${book.name}</p>
+                    <p>Brand: ${book.brand}</p>
+                    <p>Quantity: ${book.quantity}</p>
+                `;
+            } else {
+                document.getElementById('output').innerHTML = "<p>Book not found!</p>";
+            }
+        }
+
+        function showBorrowBookForm() {
+            const output = `
+                <h2>Borrow Book</h2>
+                <form onsubmit="processBookBorrowing(event)">
+                    <label>Book ID: </label>
+                    <input type="text" id="borrowBookID" required><br><br>
+                    <label>Quantity: </label>
+                    <input type="number" id="borrowQuantity" min="1" required><br><br>
+                    <button type="submit">Borrow</button>
+                </form>
+            `;
+            document.getElementById('output').innerHTML = output;
+        }
+
+        function processBookBorrowing(event) {
+            event.preventDefault();
+            const id = document.getElementById('borrowBookID').value;
+            const quantity = parseInt(document.getElementById('borrowQuantity').value, 10);
+
+            const book = books.find(book => book.id === id);
+            if (book) {
+                if (book.quantity >= quantity) {
+                    book.quantity -= quantity;
+                    alert("Book borrowed successfully!");
+                } else {
+                    alert("Error: Insufficient quantity available!");
+                }
+            } else {
+                alert("Book not found!");
+            }
+        }
+    </script>
+</body>
+</html>
